@@ -6,30 +6,30 @@ import matplotlib.pyplot as plt
 class solver:
     def __init__(self, grid):
         self.grid = grid
-    def isValidPercolation(self, grid, diagonals = True):  
+    def isValidPercolation(self, grid, diagonals = True): 
         rows, columns = len(grid), len(grid[0])
         dirs = [(0, 1), (1, 0), (0, -1), (-1, 0),        
-                (1, 1), (-1, 1), (-1, -1), (1, -1)]
+                (1, 1), (-1, 1), (-1, -1), (1, -1)] # directions if diagonals are not disabled
         if diagonals == False:
-            dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        queue = Queue()
-        visited = set()
+            dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)] # directions if diagonals are disabled 
+        queue = Queue() # FIFO data structure (first thing coming in a queue is the first that comes out)
+        visited = set() # keeps track of visited nodes
 
         # Add all top-row starts
-        for column in range(columns):
+        for column in range(columns): # checking points one by one 
             if grid[0][column] == 1:
                 queue.put((0, column))
-                visited.add((0, column))
+                visited.add((0, column)) # adding points in the top row to the queue 
 
-        if queue.empty():
-            return False
-        while not queue.empty():
-            x, y = queue.get()
+        if queue.empty(): 
+            return False # no points are valid
+        while not queue.empty(): 
+            x, y = queue.get() # Dequeue
 
             if x == rows - 1:
-                return True
+                return True # checks if you are on the last row
 
-            for dx, dy in dirs:
+            for dx, dy in dirs: # checking all different permutations of directions, if it is valid it adds it back to the queue
                 nx, ny = x + dx, y + dy
                 if (
                     0 <= nx < rows and
@@ -42,7 +42,7 @@ class solver:
 
         return False
 
-    def calculateChance(self, simulationNum, p, diagonals = True):
+    def calculateChance(self, simulationNum, p, diagonals = True): # Runs through the grid many times and calculates the probability
         validGrids = 0
         trials = 0
         while trials < simulationNum:
@@ -54,8 +54,8 @@ class solver:
         #print("Trials: " + str(trials))
         return validGrids/simulationNum * 100
 
-class percolationGrid:
-   def __init__(self, size):
+class percolationGrid: # creating the grid
+   def __init__(self, size): # constructive function
       self.grid = []
       self.size = size 
       columns = 0
@@ -81,8 +81,8 @@ class percolationGrid:
             randomGrid.append(randomRow)
         return randomGrid
 
-test = percolationGrid(10)
-prob = 0.6
+test = percolationGrid(10) # size of the grid
+prob = 0.6 # probability
 
 examplePercolate = solver(test) 
 #print("Orignal")
@@ -92,7 +92,6 @@ examplePercolate = solver(test)
 #print("Done")
 exampleRandomGrid = percolationGrid(10).randomiseGrid(prob)
 plt.imshow(exampleRandomGrid, cmap='viridis', interpolation='nearest')
-plt.colorbar(label='Value')  # Add a colorbar for reference
 plt.title("Percolation Grid")
 plt.xlabel("X-axis")
 plt.ylabel("Y-axis")
@@ -131,7 +130,7 @@ def plot_fraction_vs_p():
 
 def plot_variance_vs_L():
     sizes = range(10, 101, 10)
-    simulationNum = 15
+    simulationNum = 10
     probabilities = [0.25, 0.6]
 
     for p in probabilities:
