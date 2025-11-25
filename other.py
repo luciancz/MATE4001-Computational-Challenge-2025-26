@@ -1,5 +1,6 @@
 import numpy as np
 from queue import Queue
+import matplotlib.pyplot as plt
 
 
 class solver:
@@ -41,14 +42,16 @@ class solver:
 
         return False
 
-    def calculateChance(self, simulationNum, p):
+    def calculateChance(self, simulationNum, p, diagonals = True):
         validGrids = 0
         trials = 0
         while trials < simulationNum:
             trials += 1
             randomGrid = self.grid.randomiseGrid(p)
-            if self.isValidPercolation(randomGrid) == True:
+            if self.isValidPercolation(randomGrid, diagonals) == True:
                 validGrids += 1
+        #print("Valid: " + str(validGrids))
+        #print("Trials: " + str(trials))
         return validGrids/simulationNum * 100
 
 class percolationGrid:
@@ -79,9 +82,80 @@ class percolationGrid:
         return randomGrid
 
 test = percolationGrid(10)
+prob = 0.6
+
 examplePercolate = solver(test) 
-print("Orignal")
-print(test.returnGrid())
-print("Original")
-print(examplePercolate.calculateChance(500, 0.9))
-print("Done")
+#print("Orignal")
+#print(test.returnGrid())
+#print("Original")
+#print(examplePercolate.calculateChance(500, prob))
+#print("Done")
+exampleRandomGrid = percolationGrid(10).randomiseGrid(prob)
+plt.imshow(exampleRandomGrid, cmap='viridis', interpolation='nearest')
+plt.colorbar(label='Value')  # Add a colorbar for reference
+plt.title("Percolation Grid")
+plt.xlabel("X-axis")
+plt.ylabel("Y-axis")
+plt.show()
+
+
+
+
+def plot_fraction_vs_p():
+    L = 50
+    simulationNum = 20
+    probabilities = [0.25, 0.4, 0.6, 0.8]
+    configs = [(True, simulationNum), (False, simulationNum)]
+    labels = ["Diagonals=True", "Diagonals=False"]
+
+    plt.figure(figsize=(10, 6))
+    for (diagonals, sims), label in zip(configs, labels):
+        f_values = []
+        for p in probabilities:
+            grid = percolationGrid(L)
+            s = solver(grid)
+            f = s.calculateChance(sims, p, diagonals)
+            f_values.append(f)
+        plt.plot(probabilities, f_values, marker='o', linewidth=2, label=label)
+
+    plt.xlabel("Activation Probability p", fontsize=12)
+    plt.ylabel("Fraction of Activated Systems f", fontsize=12)
+    plt.title("Fraction f vs Activation Probability p (L=50)", fontsize=14)
+    plt.xticks(probabilities)
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+
+def plot_variance_vs_L():
+    sizes = range(10, 101, 10)
+    simulationNum = 15
+    probabilities = [0.25, 0.6]
+
+    for p in probabilities:
+        variances = []
+        for L in sizes:
+            f_values = []
+            for _ in range(simulationNum):
+                grid = percolationGrid(L)
+                s = solver(grid)
+                f_values.append(s.calculateChance(1, p))
+            variances.append(np.var(f_values))
+
+        plt.figure(figsize=(8, 5))
+        plt.plot(sizes, variances, marker='o', linewidth=2)
+        plt.xlabel("Lattice Size L", fontsize=12)
+        plt.ylabel("Variance of f", fontsize=12)
+        plt.title(f"Variance of f vs L for p={p}", fontsize=14)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+
+# Run the plots
+plot_fraction_vs_p()
+plot_variance_vs_L()
+
+
