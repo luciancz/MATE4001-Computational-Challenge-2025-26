@@ -24,7 +24,7 @@ class solver:
         if queue.empty():
             return False # no points are valid
         while not queue.empty():
-            x, y = queue.get() # Dequeue
+            x, y = queue.get() # Deque
 
             if x == rows - 1:
                 return True # checks if you are on the last row
@@ -52,7 +52,7 @@ class solver:
         #print("Trials: " + str(trials))
         return validGrids/simulationNum * 100
 
-class percolationGrid: # creating the grid
+class percolationGrid: # class to create and manage underlying grid
    def __init__(self, size): # constructor function takes in size of Grid
       self.grid = [] #Initialise empty grid
       self.size = size
@@ -67,31 +67,32 @@ class percolationGrid: # creating the grid
          columns += 1
    def returnGrid(self):
         return self.grid
-   def setPoint(self, x, y):
-        self.grid[x][y] = 1
-   def randomiseGrid(self,p):
-        return np.random.choice([0, 1], size=(self.size, self.size), p=[1-p, p])
+   def setPoint(self, x, y): # manually activates a cell
+        self.grid[x][y] = 1 # sets it to 1
+   def randomiseGrid(self,p): # creates a new random grid of the same size
+        return np.random.choice([0, 1], size=(self.size, self.size), p=[1-p, p]) # returns a NumPy 2D array
 
-def plotSystemState():
-    gridSize = 10
-    prob = 0.6
+def plotSystemState(): # shows one random grid as an image
+    gridSize = 10 # grid size 10x10
+    prob = 0.6 # each cell active with this probability 
     
     # Generate data
     systemGrid = percolationGrid(gridSize)
-    randomGrid = systemGrid.randomiseGrid(prob)
-    #Plot data as points on grid
-    plt.figure(figsize=(10, 10))
-    plt.imshow(randomGrid, cmap='viridis', interpolation='nearest')
+    randomGrid = systemGrid.randomiseGrid(prob) 
+    # Plot data as points on grid and draw as an image
+    plt.figure(figsize=(10, 10)) 
+    plt.imshow(randomGrid, cmap='viridis', interpolation='nearest') # interpolation = "nearest" means no smoothing
     plt.title("State of system when L=10 and p=0.6")
     plt.xlabel("")
     plt.ylabel("")
     print("Plot 1")
     plt.show()
 
+# plotting how often the system percolates (fraction) as p varies from 0 to 1, under 4 conditions
 def plotFractionActSystem():
     gridSize = 50
     simulationNum = 100 # Higher number = smoother curve
-    probabilities = np.linspace(0, 1, 20)
+    probabilities = np.linspace(0, 1, 20) # probabilities is 20 equally spaced values between 0 and 1
     
     graphs = [
         (True, True, "Diagonals Allowed and Periodic Boundaries"), 
@@ -114,6 +115,7 @@ def plotFractionActSystem():
             
         plt.plot(probabilities, graphValues, marker='x', linewidth=3, label=label)
 
+    # creating a grid and solver for each configuration, calculating fraction that percolates and plotting it
     plt.xlabel("single-site activation probability", fontsize=11)
     plt.ylabel("fraction of activated systems ", fontsize=11)
     plt.title("fraction of activated systems vs single-site activation probability (L=50)", fontsize=16)
@@ -122,20 +124,20 @@ def plotFractionActSystem():
     plt.tight_layout()
     print("Plot 2")
     plt.show()
-def plotVariance():
-    # L from 10 to 100 step size 5
+def plotVariance(): #shows how variance changes with grid size
+    # from 10 to 100 step size 5
     sizes = range(5, 101, 10) 
     graphProbabilities = [0.25, 0.6]
-    
+    # taking 100 measurements for each size, each measurement averaging 10 simulations 
     measurements = 100  
     simsPerMeasurement = 10 
 
-    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5)) 
 
-    for i, p in enumerate(graphProbabilities):
-        variances = []
+    for i, p in enumerate(graphProbabilities): 
+        variances = [] 
         for L in sizes:
-            fList = []
+            fList = [] # collecting a list of 100 fraction values
             systemGrid = percolationGrid(L) 
             curSolver = solver(systemGrid)
             for g in range(measurements):
@@ -143,7 +145,7 @@ def plotVariance():
                 f = percentage / 100.0
                 fList.append(f)
             
-            variances.append(np.var(fList))
+            variances.append(np.var(fList)) # computing the variance from those 100 fraction values and appending to the list
 
         axes[i].plot(sizes, variances, marker='o', linewidth=2, color='red')
         axes[i].set_xlabel("Lattice Size", fontsize=12)
@@ -155,7 +157,7 @@ def plotVariance():
     print("Plot 3")
     plt.show()
 
-
+# runs the three plotting functions
 if __name__ == "__main__":
     plotSystemState()
     plotFractionActSystem()
